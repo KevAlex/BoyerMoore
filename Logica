@@ -1,0 +1,79 @@
+import java.util.ArrayList;
+
+public class Logica {
+
+	private String texto, cadena, cadenaInvertida;
+	private int l;
+	private ArrayList<String> posiciones = new ArrayList<String>();
+	private ArrayList<String> palindromas = new ArrayList<String>();
+	private static Logica instancia = null;
+	
+	private Logica(String texto) {
+		this.texto = texto;
+	}
+	
+	public static Logica getInstancia(String texto) {
+		if(instancia == null) {
+			instancia = new Logica(texto);
+		}
+		return instancia;
+	}
+	
+	public void iniciarBoyer(String cadena) {
+		this.cadena = cadena;
+		cadenaInvertida = invertirCadena();
+		l = cadena.length()-1;
+		posiciones.clear();
+		boyer(l);
+	}
+	
+	private void boyer(int pos) {
+		if(pos < texto.length()) {
+			if(texto.charAt(pos) != cadena.charAt(l)) {
+				if(cadena.indexOf(texto.charAt(pos)) == -1){
+					boyer(pos+l+1);
+				} else{
+					boyer(pos + cadenaInvertida.indexOf(texto.charAt(pos)));
+				}
+			} else {
+				if(texto.substring(pos-l, pos+1).equals(cadena)) {
+					posiciones.add(String.valueOf(pos-l));
+				}
+				boyer(pos+l+1);
+			} 
+		} 
+	}
+	
+	private void buscarPalindromas(String txt) {
+		if(txt.indexOf(' ') != -1) {
+			String aux = txt.substring(0, txt.indexOf(' '));
+			StringBuffer sb = new StringBuffer(aux);
+			sb = sb.reverse();
+			if(aux.equalsIgnoreCase(sb.toString()) && aux.length()>1) {
+				palindromas.add(aux);
+			}
+			buscarPalindromas(txt.substring(txt.indexOf(' ') + 1));	
+		}
+
+        }
+	
+	public void buscarPalindroma() {
+		buscarPalindromas(texto);
+	}
+	
+	public String invertirCadena() {
+	    String ci = "";
+		for (int k=cadena.length()-1; k>=0; k--) {
+	    	ci = ci + cadena.charAt(k);
+	    }
+	    return ci;
+	}
+
+	public ArrayList<String> getPosiciones() {
+		return posiciones;
+	}
+
+	public ArrayList<String> getPalindromas() {
+		return palindromas;
+	}
+}
