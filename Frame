@@ -1,0 +1,128 @@
+package BoyerMoore;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JEditorPane;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.EmptyBorder;
+
+public class Frame extends JFrame implements ActionListener{
+
+	private JPanel contentPane;
+	private JButton btnIngresarTexto, btnIngresarPalabra,  btnPalindromas, btnEjecutar;
+	private JEditorPane editorPane;
+	private String texto, cadena;
+	private Logica lo;
+	
+	public Frame() {
+		setTitle("Bienvenido");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(200, 200, 700, 500);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		editorPane = new JEditorPane();
+		editorPane.setBounds(15, 16, 648, 350);
+		editorPane.setContentType("text/plain");
+		contentPane.add(editorPane);
+		
+		btnIngresarTexto = new JButton("Ingresar Texto");
+		btnIngresarTexto.setBounds(15, 382, 150, 29);
+		btnIngresarTexto.addActionListener(this);
+		contentPane.add(btnIngresarTexto);
+		
+		btnIngresarPalabra = new JButton("Ingresar Palabra");
+		btnIngresarPalabra.setBounds(180, 382, 150, 29);
+		btnIngresarPalabra.addActionListener(this);
+		contentPane.add(btnIngresarPalabra);
+		
+		btnPalindromas = new JButton("Palindromas");
+		btnPalindromas.setBounds(530, 382, 133, 29);
+		btnPalindromas.addActionListener(this);
+		contentPane.add(btnPalindromas);
+		
+		btnEjecutar = new JButton("Ejecutar Algoritmo");
+		btnEjecutar.setBounds(345, 382, 170, 29);
+		btnEjecutar.addActionListener(this);
+		contentPane.add(btnEjecutar);
+		
+		JScrollPane scroll = new JScrollPane(editorPane);
+		scroll.setBounds(15, 16, 648, 350);
+		contentPane.add(scroll);
+		this.setVisible(true);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getActionCommand() == "Ingresar Texto") {
+			texto = editorPane.getText();
+			lo = Logica.getInstancia(texto);
+			JOptionPane.showMessageDialog(this, "Texto tomado exitosamente", "Ingresar Texto", JOptionPane.PLAIN_MESSAGE);
+		}
+		
+		if(e.getActionCommand() == "Ingresar Palabra") {
+			cadena = JOptionPane.showInputDialog(this, "Digite la palabra que desea buscar", "Ingresar Palabra", JOptionPane.INFORMATION_MESSAGE);
+		}
+		
+		if(e.getActionCommand() == "Ejecutar Algoritmo") {
+			try {
+				lo.iniciarBoyer(cadena);
+				editorPane.setText(modificarTexto());
+			}catch (Exception ex) {
+				JOptionPane.showMessageDialog(this, "No ingreso el texto y/o la cadena", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		
+		if(e.getActionCommand() == "Palindromas") {
+			try {
+				lo.buscarPalindroma();
+				//resaltarPalindromas();
+				System.out.println("Se encontraron " + lo.getPalindromas().size() + " palabras palindromas");
+				for(int k=0; k<lo.getPalindromas().size(); k++) {
+					System.out.println(lo.getPalindromas().get(k));
+				}
+			}catch (Exception ex) {
+				JOptionPane.showMessageDialog(this, "No ingreso el texto", "Error", JOptionPane.ERROR_MESSAGE);
+				System.out.println(ex.getMessage());
+			}
+		}
+	}
+	
+	public String modificarTexto() {
+		int pos = 0, posActual;
+		String textoModificado = "<html> <head> <br>Se encontraron " + lo.getPosiciones().size() + " coincidencias: </head><br>  <body>"
+				+ "<p style=\"margin-top: 0\"><br>";
+		for(int k=0; k<lo.getPosiciones().size(); k++) {
+			posActual = Integer.valueOf(lo.getPosiciones().get(k));
+			textoModificado += texto.substring(pos, posActual);
+			pos = posActual + cadena.length();
+			textoModificado += "<b>" + texto.substring(posActual, pos) + "</b>";
+		}
+		textoModificado += texto.substring(pos) + "<br> </body><br></html>";
+		editorPane.setContentType("text/html");
+		return textoModificado;
+	}
+	
+	public void resaltarPalindromas() {	
+		int pos = 0, posActual;
+		String textoModificado = "<html> <head> <br>Se encontraron " + lo.getPalindromas().size() + " palabras palindromas: </head><br>  <body>"
+				+ "<p style=\"margin-top: 0\"><br>";
+		for(int k=0; k<lo.getPalindromas().size(); k++) {
+			lo.iniciarBoyer(lo.getPalindromas().get(k));
+			posActual = Integer.valueOf(lo.getPosiciones().get(k));
+			textoModificado += texto.substring(pos, posActual);
+			pos = posActual + cadena.length();
+			textoModificado += "<b><font color=\"red\">" + texto.substring(posActual, pos) + "</font></b>";
+			textoModificado += texto.substring(pos) + "<br> </body><br></html>";
+			editorPane.setContentType("text/html");
+			editorPane.setText(textoModificado);
+			JOptionPane.showConfirmDialog(null, "Palindroma #" + (k+1) + " " + lo.getPalindromas().get(k));
+		}
+	}
+}
